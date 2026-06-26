@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chispaclips-skill"
+version = "1.0.0"
+description = "Pipeline diario de clips virales para creadores hispanohablantes, por BrainMatic"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "BrainMatic", email = "[email protected]" },
+]
+keywords = [
+    "tiktok", "reels", "shorts", "video", "viral", "clips",
+    "whisper", "gemini", "claude", "openai", "openrouter",
+    "brainmatic", "chispaclips", "content-creation",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Spanish",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "faster-whisper>=1.0.3",
+    "google-genai>=0.8.0",
+    "anthropic>=0.40.0",
+    "openai>=1.50.0",
+    "requests>=2.32.0",
+    "python-dotenv>=1.0.1",
+    "Pillow>=10.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "mypy>=1.10.0",
+    "ruff>=0.5.0",
+]
+
+[project.scripts]
+chispaclips = "chispaclips.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/brainmatic/chispaclips-skill"
+Repository = "https://github.com/brainmatic/chispaclips-skill"
+Issues = "https://github.com/brainmatic/chispaclips-skill/issues"
+
+[tool.setuptools.packages.find]
+include = ["chispaclips*"]
+exclude = ["tests*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true

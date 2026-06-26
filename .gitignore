@@ -1,0 +1,51 @@
+# Entorno y secretos
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+.eggs/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Datos de runtime de ChispaClips (regenerables)
+.chispaclips/
+input/
+output/
+state/
+learnings/HOT.md
+learnings/post-history.jsonl
+learnings/candidate-history.jsonl
+learnings/metrics.jsonl
+learnings/metrics.jsonl.gz
+learnings/HOT.*.md.bak
+learnings/runs/
+learnings/insights/
+
+# Sistema
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Subidas temporales de videos
+uploads/
+tmp/

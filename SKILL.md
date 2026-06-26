@@ -49,7 +49,9 @@ UPLOAD_POST_API_KEY=...
 UPLOAD_POST_PROFILE=...
 INPUT_FOLDER=/ruta/absoluta/a/videos/largos
 OUTPUT_FOLDER=/ruta/absoluta/clips
+TRANSCRIBER_PROVIDER=whisper  # whisper | groq (ver sección "Transcripción")
 WHISPER_MODEL=medium
+GROQ_API_KEY=...              # solo si TRANSCRIBER_PROVIDER=groq
 TIMEZONE=America/Bogota
 ```
 
@@ -120,6 +122,12 @@ python -m chispaclips transcribe "<VIDEO_PATH>"
 ```
 
 Escribe `.chispaclips/output/<video_slug>/transcript.json` con segmentos a nivel de oración y marcas por palabra. Whisper autodetecta el idioma. Modelo por defecto: `medium`.
+
+**Proveedor de transcripción** (configurable vía `TRANSCRIBER_PROVIDER` en `.env`):
+- `whisper` (default) — corre `faster-whisper` en CPU local. Privado, gratis, primera ejecución descarga el modelo (~1.5 GB).
+- `groq` — usa la API de Groq (Whisper large-v3 en la nube). **~30× más rápido**: un video de 10 min se transcribe en ~10s en vez de ~5min. Requiere `GROQ_API_KEY`. Si el video es >25 MB, ChispaClips extrae el audio a MP3 mono 64 kbps antes de enviarlo.
+
+Override puntual por llamada: `python -m chispaclips transcribe video.mp4 --provider groq`
 
 ### Paso 3 — Analizar con el LLM configurado
 
@@ -337,6 +345,32 @@ OPENAI_BASE_URL=https://openrouter.ai/api/v1
 OPENAI_MODEL=anthropic/claude-3.5-sonnet
 ```
 
+## Cambio de proveedor de transcripción
+
+ChispaClips también es agnóstico del proveedor de transcripción. Para usar Groq en vez de Whisper local (mucho más rápido, pero envía audio a la nube):
+
+```bash
+# 1. Consigue una API key gratis en https://console.groq.com/
+# 2. Edita .env:
+TRANSCRIBER_PROVIDER=groq
+GROQ_API_KEY=gsk_...
+GROQ_WHISPER_MODEL=whisper-large-v3   # o whisper-large-v3-turbo
+
+# 3. Listo, la próxima vez que ejecutes `transcribe` usará Groq
+python -m chispaclips transcribe "<VIDEO_PATH>"
+```
+
+| Aspecto | `whisper` (local) | `groq` (API) |
+|---|---|---|
+| Velocidad (video de 10 min) | ~5 min en CPU | ~10 segundos |
+| Privacidad | 100% local (no sale del equipo) | audio viaja a Groq |
+| Costo | Gratis | Tier gratuito generoso + planes de pago |
+| Privacidad del modelo | Privado | Compartido |
+| Requisito de disco | ~1.5 GB para `medium` | Ninguno |
+| Requisito de internet | No (excepto 1ª descarga) | Sí (cada transcripción) |
+| Calidad (es-MX, es-CO, es-AR) | Muy buena | Excelente (Whisper large-v3) |
+| Límite de tamaño | Sin límite | 25 MB (ChispaClips extrae audio a MP3 si excede) |
+
 ## Notas operativas
 
 - **Confirma siempre** antes del Paso 4 (trabajo pesado de ffmpeg — no lo saltes, pero confirma si el LLM devolvió > 15 candidatos — podría perder tiempo), antes del Paso 7 (publicar es irreversible una vez programado), y después del Paso 6 (copy de metadata).
@@ -346,4 +380,4 @@ OPENAI_MODEL=anthropic/claude-3.5-sonnet
 - Todos los archivos de clip son rutas absolutas bajo `.chispaclips/output/<video_slug>/`. Surfázcalas claramente para que el harness openclaw pueda adjuntarlas al reenviar a Telegram / WhatsApp / el canal que sea.
 - Si `pick` dice "todos los videos ya procesados", avisa al usuario y para — no reproceses. Necesita soltar un video nuevo en `INPUT_FOLDER`.
 - El archivo de estado en `.chispaclips/state/processed.json` es la **única** memoria entre ejecuciones. Nunca lo edites programáticamente excepto via `mark-processed`. Si el usuario pide "reprocesar el video X", lo correcto es pedirle confirmación y luego eliminar manualmente la entrada correspondiente de `state/processed.json`.
-- El modelo Whisper `medium` (~1.5 GB) se descarga en la primera llamada a `transcribe`. Avisa al usuario de que la primera ejecución tardará más — las siguientes reutilizan el modelo cacheado.
+- El modelo Whisper `medium` (~1.5 GB) se descarga en la primera llamada a `transcribe` — **solo si `TRANSCRIBER_PROVIDER=whisper`**. Avisa al usuario de que la primera ejecución tardará más — las siguientes reutilizan el modelo cacheado. Si `TRANSCRIBER_PROVIDER=groq` no hay descarga inicial.

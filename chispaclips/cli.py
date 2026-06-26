@@ -50,8 +50,10 @@ def _construir_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("pick", help="elige el siguiente video a procesar (ciclo más reciente)").set_defaults(func=cmd_pick)
 
-    t = sub.add_parser("transcribe", help="transcribe un video con Whisper (palabra por palabra)")
+    t = sub.add_parser("transcribe", help="transcribe un video (Whisper local o Groq API)")
     t.add_argument("video", help="ruta absoluta al video largo")
+    t.add_argument("--provider", choices=["whisper", "groq"], default=None,
+                   help="override puntual del proveedor de transcripción")
     t.add_argument("--model", default=None, help="modelo Whisper (override de WHISPER_MODEL)")
     t.add_argument("--output", default=None, help="ruta de salida del transcript.json")
     t.set_defaults(func=cmd_transcribe)

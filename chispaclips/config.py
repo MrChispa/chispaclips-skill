@@ -14,6 +14,7 @@ PAQUETE_ROOT = Path(__file__).resolve().parent.parent
 CARPETA_RUNTIME = PAQUETE_ROOT / ".chispaclips"
 
 LLM_PROVEEDORES_VALIDOS = frozenset({"gemini", "claude", "openai"})
+TRANSCRIBER_PROVEEDORES_VALIDOS = frozenset({"whisper", "groq"})
 
 
 def cargar_env(archivo: Path | None = None) -> None:
@@ -45,6 +46,10 @@ class Config:
 
     whisper_model: str = "medium"
     whisper_language: str = ""
+
+    transcriber_provider: str = "whisper"
+    groq_api_key: str = ""
+    groq_whisper_model: str = "whisper-large-v3"
 
     timezone: str = "America/Bogota"
 
@@ -104,6 +109,13 @@ def cargar_config() -> Config:
             f"Opciones válidas: {', '.join(sorted(LLM_PROVEEDORES_VALIDOS))}."
         )
 
+    transcriber = (os.getenv("TRANSCRIBER_PROVIDER", "whisper") or "whisper").strip().lower()
+    if transcriber not in TRANSCRIBER_PROVEEDORES_VALIDOS:
+        raise SystemExit(
+            f"TRANSCRIBER_PROVIDER inválido: {transcriber!r}. "
+            f"Opciones válidas: {', '.join(sorted(TRANSCRIBER_PROVEEDORES_VALIDOS))}."
+        )
+
     api_key = ""
     if provider == "gemini":
         api_key = os.getenv("GEMINI_API_KEY", "").strip()
@@ -133,6 +145,12 @@ def cargar_config() -> Config:
         learnings_folder=_path("LEARNINGS_FOLDER", CARPETA_RUNTIME / "learnings"),
         whisper_model=os.getenv("WHISPER_MODEL", "medium").strip() or "medium",
         whisper_language=os.getenv("WHISPER_LANGUAGE", "").strip(),
+        transcriber_provider=transcriber,
+        groq_api_key=os.getenv("GROQ_API_KEY", "").strip(),
+        groq_whisper_model=(
+            os.getenv("GROQ_WHISPER_MODEL", "whisper-large-v3").strip()
+            or "whisper-large-v3"
+        ),
         timezone=os.getenv("TIMEZONE", "America/Bogota").strip() or "America/Bogota",
         claude_video_frames=int(os.getenv("CLAUDE_VIDEO_FRAMES", "12") or "12"),
         openai_base_url=(
@@ -151,6 +169,8 @@ def validar_para_pipeline(cfg: Config) -> list[str]:
     faltan: list[str] = []
     if not cfg.llm_api_key:
         faltan.append(f"API key del proveedor LLM ({cfg.llm_provider.upper()})")
+    if cfg.transcriber_provider == "groq" and not cfg.groq_api_key:
+        faltan.append("GROQ_API_KEY (transcriber configurado como 'groq')")
     if not cfg.upload_post_api_key:
         faltan.append("UPLOAD_POST_API_KEY")
     if not cfg.upload_post_profile:

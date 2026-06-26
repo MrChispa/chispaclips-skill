@@ -104,12 +104,15 @@ nano .env  # o tu editor favorito
 | `OPENAI_API_KEY` | condicional | — | API key de OpenAI / OpenRouter / OpenCode |
 | `OPENAI_BASE_URL` | no | `https://api.openai.com/v1` | Endpoint compatible |
 | `OPENAI_MODEL` | no | `gpt-4o-mini` | Modelo a invocar |
+| `TRANSCRIBER_PROVIDER` | no | `whisper` | `whisper` (local CPU) \| `groq` (API nube, ~30× más rápido) |
+| `WHISPER_MODEL` | no | `medium` | Solo si `TRANSCRIBER_PROVIDER=whisper`: `tiny` \| `base` \| `small` \| `medium` \| `large-v3` |
+| `WHISPER_LANGUAGE` | no | autodetect | Forzar idioma (ej. `es`, `en`, `pt`) |
+| `GROQ_API_KEY` | condicional | — | Solo si `TRANSCRIBER_PROVIDER=groq` (gratis en https://console.groq.com) |
+| `GROQ_WHISPER_MODEL` | no | `whisper-large-v3` | `whisper-large-v3` \| `whisper-large-v3-turbo` |
 | `UPLOAD_POST_API_KEY` | sí (para publicar) | — | API key de Upload-Post |
 | `UPLOAD_POST_PROFILE` | sí (para publicar) | — | Nombre del profile en Manage Users |
 | `INPUT_FOLDER` | no | `<repo>/.chispaclips/input` | Carpeta con videos largos |
 | `OUTPUT_FOLDER` | no | `<repo>/.chispaclips/output` | Carpeta de salida de clips |
-| `WHISPER_MODEL` | no | `medium` | `tiny` \| `base` \| `small` \| `medium` \| `large-v3` |
-| `WHISPER_LANGUAGE` | no | autodetect | Forzar idioma (ej. `es`, `en`, `pt`) |
 | `TIMEZONE` | no | `America/Bogota` | Zona horaria IANA para programaciones |
 | `CLAUDE_VIDEO_FRAMES` | no | `12` | Frames a extraer para análisis con Claude |
 
@@ -141,6 +144,11 @@ chispaclips-skill/
     │   ├── gemini.py           # Google Gemini (multimodal nativo, Files API)
     │   ├── claude.py           # Anthropic Claude (extrae frames con ffmpeg)
     │   └── openai_compat.py    # OpenAI / OpenRouter / OpenCode (cualquier API OpenAI-spec)
+    ├── transcriber/
+    │   ├── base.py             # Clase abstracta Transcriber
+    │   ├── factory.py          # Selección por TRANSCRIBER_PROVIDER
+    │   ├── whisper_local.py    # faster-whisper en CPU (privado, gratis)
+    │   └── groq.py             # Groq API (Whisper large-v3, ~30× más rápido)
     ├── prompts/
     │   ├── analisis_es.py      # PROMPT_ANALISIS (con inyección de dialecto)
     │   ├── aprendizaje_es.py   # META_PROMPT_APRENDIZAJE (HOT.md)
@@ -260,6 +268,53 @@ OPENAI_BASE_URL=https://openrouter.ai/api/v1
 OPENAI_MODEL=anthropic/claude-3.5-sonnet
 ```
 
+## Proveedor de Transcripción
+
+ChispaClips también es agnóstico del proveedor de transcripción. Tienes dos opciones:
+
+| Aspecto | `whisper` (local) | `groq` (API) |
+|---|---|---|
+| Velocidad (video de 10 min) | ~5 minutos en CPU | **~10 segundos** |
+| Privacidad | 100% local (no sale del equipo) | audio viaja a Groq |
+| Costo | Gratis | Tier gratuito generoso + planes de pago |
+| Requisito de disco | ~1.5 GB para `medium` | Ninguno |
+| Requisito de internet | Solo en la primera descarga | Siempre |
+| Calidad (es-MX, es-CO, es-AR) | Muy buena | Excelente (Whisper large-v3) |
+| Límite de tamaño | Sin límite | 25 MB (ChispaClips extrae audio MP3 si excede) |
+| Modelo | configurable vía `WHISPER_MODEL` | configurable vía `GROQ_WHISPER_MODEL` |
+
+### Opción A — Whisper local (default)
+
+```bash
+# .env
+TRANSCRIBER_PROVIDER=whisper
+WHISPER_MODEL=medium            # tiny | base | small | medium | large-v3
+WHISPER_LANGUAGE=              # vacío = autodetección
+```
+
+### Opción B — Groq API (recomendado para velocidad)
+
+```bash
+# 1. Consigue una API key gratis en https://console.groq.com/
+# 2. Edita .env:
+TRANSCRIBER_PROVIDER=groq
+GROQ_API_KEY=gsk_...
+GROQ_WHISPER_MODEL=whisper-large-v3   # o whisper-large-v3-turbo
+
+# 3. Listo, la próxima vez que ejecutes `transcribe` usará Groq
+python -m chispaclips transcribe "<VIDEO_PATH>"
+```
+
+### Override puntual por llamada
+
+```bash
+python -m chispaclips transcribe video.mp4 --provider groq
+# o
+python -m chispaclips transcribe video.mp4 --provider whisper
+```
+
+El formato de salida (`transcript.json`) es idéntico en ambos proveedores — el resto del pipeline no nota la diferencia.
+
 ## Aprendizaje Continuo
 
 Cada clip publicado se registra en `learnings/post-history.jsonl` con su
@@ -322,6 +377,7 @@ Lo demás lo hace una inteligencia artificial.
 - **Una computadora** (Mac, Linux o Windows con WSL).
 - **Una cuenta gratuita en Google** (para la IA de Gemini).
 - **Una cuenta gratuita en Upload-Post** (para publicar en TikTok, etc.).
+- *(Opcional pero recomendado)* **Una cuenta gratuita en Groq** (para transcripciones mucho más rápidas).
 - **Las llaves de acceso** que se generan en esas páginas (son como contraseñas especiales para que la IA trabaje por ti).
 
 No necesitas saber programar. Solo seguir los pasos.
@@ -337,9 +393,9 @@ Abre tu agente favorito (Claude Code, GPT, Cursor, etc.) y dile:
 El agente se encargará de:
 - Descargar el código.
 - Instalar las dependencias.
-- Pedirte las dos claves que necesita (Gemini y Upload-Post).
+- Pedirte las dos o tres claves que necesita (Gemini, Upload-Post y opcionalmente Groq).
 
-### Paso 2 — Consigue las dos claves gratuitas
+### Paso 2 — Consigue las claves gratuitas
 
 #### Clave 1: Google Gemini (la IA que analiza tus videos)
 1. Ve a https://aistudio.google.com/apikey
@@ -347,7 +403,13 @@ El agente se encargará de:
 3. Haz clic en "Create API key".
 4. Copia la clave (empieza con `AIza...`).
 
-#### Clave 2: Upload-Post (para publicar en TikTok / Instagram / YouTube)
+#### Clave 2: Groq (opcional pero muy recomendado — transcripción 30× más rápida)
+1. Ve a https://console.groq.com/
+2. Crea una cuenta gratis.
+3. En el panel, ve a **API Keys** y genera una nueva.
+4. Copia la clave (empieza con `gsk_...`).
+
+#### Clave 3: Upload-Post (para publicar en TikTok / Instagram / YouTube)
 1. Ve a https://app.upload-post.com
 2. Crea una cuenta gratis.
 3. Conecta tus redes sociales (TikTok, Instagram, YouTube) desde el panel.

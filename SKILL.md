@@ -6,7 +6,7 @@ compatibility: "Requiere ffmpeg, Python 3.11+, faster-whisper, google-genai (Gem
 metadata:
   author: BrainMatic
   version: "1.0.0"
-  homepage: "https://github.com/brainmatic/chispaclips-skill"
+  homepage: "https://github.com/MrChispa/chispaclips-skill"
   llm_providers:
     - gemini
     - claude

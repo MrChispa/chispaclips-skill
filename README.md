@@ -5,12 +5,12 @@
 > aprobación desde el móvil y aprendizaje continuo a partir del engagement
 > real de cada clip publicado.
 >
-> Hecho con cariño por **BrainMatic** · [github.com/brainmatic/chispaclips-skill](https://github.com/brainmatic/chispaclips-skill)
+> Hecho con cariño por **BrainMatic** · [github.com/MrChispa/chispaclips-skill](https://github.com/MrChispa/chispaclips-skill)
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License MIT](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
-[![Multi-LLM](https://img.shields.io/badge/LLM-Gemini%20%7C%20Claude%20%7C%20OpenAI-purple.svg)](#proveedor-llm)
-[![Idioma](https://img.shields.io/badge/idioma-espa%C3%B1ol-red.svg)](#)
+[![Multi-LLM](https://img.shields.io/badge/LLM-Gemini%20Claude%20OpenAI-blueviolet)](#proveedor-llm)
+[![Idioma](https://img.shields.io/badge/idioma-espanol-red)](#)
 
 ---
 
@@ -68,7 +68,7 @@ de creación de clips cortos a partir de videos largos:
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/brainmatic/chispaclips-skill.git ~/Documents/chispaclips-skill
+git clone https://github.com/MrChispa/chispaclips-skill.git ~/Documents/chispaclips-skill
 cd ~/Documents/chispaclips-skill
 
 # 2. Crear entorno virtual
@@ -332,7 +332,7 @@ No necesitas saber programar. Solo seguir los pasos.
 
 Abre tu agente favorito (Claude Code, GPT, Cursor, etc.) y dile:
 
-> *"Configura https://github.com/brainmatic/chispaclips-skill para mí. Lee el README.md."*
+> *"Configura https://github.com/MrChispa/chispaclips-skill para mí. Lee el README.md."*
 
 El agente se encargará de:
 - Descargar el código.
@@ -527,7 +527,7 @@ un único directorio oculto `.chispaclips/`. Beneficios:
 - **Autor original**: [mutonby](https://github.com/mutonby) — repositorio
   [Upload-Post/skill-autoshorts](https://github.com/Upload-Post/skill-autoshorts)
   v2.0.0 (MIT). La arquitectura del pipeline es suya.
-- **Fork y mantenimiento**: [BrainMatic](https://github.com/brainmatic).
+- **Fork y mantenimiento**: BrainMatic · [github.com/MrChispa](https://github.com/MrChispa)
   Refactor modular, localización al español, abstracción multi-LLM,
   detección automática de dialecto y optimizaciones.
 - **APIs externas**:
@@ -545,4 +545,4 @@ MIT. Ver [`LICENSE`](./LICENSE).
 ---
 
 ¿Encontraste un bug? ¿Quieres pedir una función? Abre un issue en
-[github.com/brainmatic/chispaclips-skill/issues](https://github.com/brainmatic/chispaclips-skill/issues).
+[github.com/MrChispa/chispaclips-skill/issues](https://github.com/MrChispa/chispaclips-skill/issues).

@@ -51,9 +51,9 @@ dev = [
 chispaclips = "chispaclips.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/brainmatic/chispaclips-skill"
-Repository = "https://github.com/brainmatic/chispaclips-skill"
-Issues = "https://github.com/brainmatic/chispaclips-skill/issues"
+Homepage = "https://github.com/MrChispa/chispaclips-skill"
+Repository = "https://github.com/MrChispa/chispaclips-skill"
+Issues = "https://github.com/MrChispa/chispaclips-skill/issues"
 
 [tool.setuptools.packages.find]
 include = ["chispaclips*"]
